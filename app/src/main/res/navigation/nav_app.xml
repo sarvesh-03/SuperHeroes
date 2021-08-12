@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_app"
+    app:startDestination="@id/blankFragment">
+
+    <fragment
+        android:id="@+id/blankFragment"
+        android:name="com.example.superheroes.BlankFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" >
+        <action
+            android:id="@+id/action_blankFragment_to_male"
+            app:destination="@id/male" />
+        <action
+            android:id="@+id/action_blankFragment_to_female"
+            app:destination="@id/female" />
+        <action
+            android:id="@+id/action_blankFragment_to_details"
+            app:destination="@id/details" />
+        <action
+            android:id="@+id/action_blankFragment_to_favourite"
+            app:destination="@id/favourite" />
+    </fragment>
+    <fragment
+        android:id="@+id/details"
+        android:name="com.example.superheroes.Details"
+        android:label="fragment_details"
+        tools:layout="@layout/fragment_details" />
+    <fragment
+        android:id="@+id/male"
+        android:name="com.example.superheroes.male"
+        android:label="fragment_male"
+        tools:layout="@layout/fragment_male" >
+        <action
+            android:id="@+id/action_male_to_details"
+            app:destination="@id/details" />
+    </fragment>
+    <fragment
+        android:id="@+id/female"
+        android:name="com.example.superheroes.female"
+        android:label="fragment_female"
+        tools:layout="@layout/fragment_female" >
+        <action
+            android:id="@+id/action_female_to_details"
+            app:destination="@id/details" />
+    </fragment>
+    <fragment
+        android:id="@+id/favourite"
+        android:name="com.example.superheroes.Favourite"
+        android:label="fragment_favourite"
+        tools:layout="@layout/fragment_favourite" />
+</navigation>
