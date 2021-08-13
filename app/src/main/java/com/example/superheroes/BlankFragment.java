@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 
 import java.util.List;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,12 +71,14 @@ public class BlankFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        Log.v("T","Oncreate");
     }
 
     @Override
     public void onAttach(@NonNull  Context context) {
         super.onAttach(context);
         listener=(Listener)context;
+        Log.v("T","OnAttach");
     }
 
     public interface Listener{
@@ -91,6 +95,9 @@ public class BlankFragment extends Fragment {
     private Listener listener;
     private SearchView searchView;
     private CardAdapter searchAdapter;
+    private List<FavHero> superHeroes;
+    private AppDataBase appDataBase;
+    FavDao favDao;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -99,12 +106,15 @@ public class BlankFragment extends Fragment {
         View view=inflater.inflate(R.layout.fragment_blank, container, false);
         recyclerView=view.findViewById(R.id.recyclerview);
         progressBar=view.findViewById(R.id.progressBar);
+        appDataBase= Room.databaseBuilder(getContext(),AppDataBase.class,"FavDataBase").allowMainThreadQueries().build();
         if(recyclerView.getLayoutManager()==null)
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(cardAdapter);
         searchView=view.findViewById(R.id.searchView);
         searchAdapter=new CardAdapter();
+        favDao=appDataBase.favDao();
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -139,35 +149,30 @@ public class BlankFragment extends Fragment {
 
 
 
+        if(cardAdapter.getItemCount()==0) {
+            Call<List<superHero>> call = myApi.getAll();
+            call.enqueue(new Callback<List<superHero>>() {
+                @Override
+                public void onResponse(Call<List<superHero>> call, Response<List<superHero>> response) {
+                    if (response.code() == 200) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        cardAdapter.addAll(response.body());
+                        Log.v("dataFetched", "" + response.body().get(0).getName() + " " + cardAdapter.getItemCount());
 
-        Call<List<superHero>>call=myApi.getAll();
-        call.enqueue(new Callback<List<superHero>>() {
-            @Override
-            public void onResponse(Call<List<superHero>> call, Response<List<superHero>> response) {
-                if(response.code()==200){
-                    progressBar.setVisibility(View.INVISIBLE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    cardAdapter.addAll(response.body());
-                    Log.v("dataFetched",""+response.body().get(0).getName()+" "+cardAdapter.getItemCount());
+                    }
+                    Log.v("dataFetched", "" + response.code());
+                }
+
+                @Override
+                public void onFailure(Call<List<superHero>> call, Throwable t) {
+                    Log.v("fail", "failed");
 
                 }
-                Log.v("dataFetched",""+response.code());
-            }
-
-            @Override
-            public void onFailure(Call<List<superHero>> call, Throwable t) {
-                Log.v("fail","failed");
-
-            }
-        });
-
-
-
-
-
-
-
-
+            });
+        }
+        else progressBar.setVisibility(View.INVISIBLE);
+        Log.v("T","OncreateView");
 
         return view;
     }
@@ -177,7 +182,7 @@ public class BlankFragment extends Fragment {
             searchAdapter.clear();
         if(cardAdapter.getItemCount()!=0){
             for(int i=0;i<cardAdapter.getItemCount();i++){
-                if(cardAdapter.getItem(i).getName().contains(query)||cardAdapter.getItem(i).getId().contains(query)){
+                if(cardAdapter.getItem(i).getName().contains(query)||cardAdapter.getItem(i).getId().equals(query)){
                     searchAdapter.add(cardAdapter.getItem(i));
                 }
             }

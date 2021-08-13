@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements BlankFragment.Lis
             navController.navigate(R.id.action_male_to_details,bundle);
         if(navController.getCurrentDestination().getId()==R.id.female)
             navController.navigate(R.id.action_female_to_details,bundle);
+        if(navController.getCurrentDestination().getId()==R.id.favourite)
+            navController.navigate(R.id.action_favourite_to_details,bundle);
         Log.v("Main",hero.getName());
         //details.SetHero(hero);
 

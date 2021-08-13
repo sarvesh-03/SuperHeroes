@@ -132,38 +132,43 @@ public class male extends Fragment {
 
             }
         }));
-        Call<List<superHero>> call=myApi.getAll();
-        call.enqueue(new Callback<List<superHero>>() {
-            @Override
-            public void onResponse(Call<List<superHero>> call, Response<List<superHero>> response) {
-                if(response.code()==200){
-                    progressBar.setVisibility(View.INVISIBLE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    for(int i=0;i<response.body().size();i++){
-                        if(response.body().get(i).getAppearance().get("gender").getAsString().equals("Male"))
-                            cardAdapter.add(response.body().get(i));
+        if(cardAdapter.getItemCount()==0) {
+            Call<List<superHero>> call = myApi.getAll();
+            call.enqueue(new Callback<List<superHero>>() {
+                @Override
+                public void onResponse(Call<List<superHero>> call, Response<List<superHero>> response) {
+                    if (response.code() == 200) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        for (int i = 0; i < response.body().size(); i++) {
+                            if (response.body().get(i).getAppearance().get("gender").getAsString().equals("Male"))
+                                cardAdapter.add(response.body().get(i));
+                        }
+                        Log.v("dataFetched", "" + response.body().get(0).getName() + " " + cardAdapter.getItemCount());
+
                     }
-                    Log.v("dataFetched",""+response.body().get(0).getName()+" "+cardAdapter.getItemCount());
+                    Log.v("dataFetched", "" + response.code());
+                }
+
+                @Override
+                public void onFailure(Call<List<superHero>> call, Throwable t) {
+                    Log.v("fail", "failed");
 
                 }
-                Log.v("dataFetched",""+response.code());
-            }
-
-            @Override
-            public void onFailure(Call<List<superHero>> call, Throwable t) {
-                Log.v("fail","failed");
-
-            }
-        });
+            });
+        }
+        else progressBar.setVisibility(View.INVISIBLE);
         return view;
     }
 
     public void SearchCard(String query) {
+        Log.v("sea",""+searchAdapter.getItemCount());
         if(searchAdapter.getItemCount()!=0)
             searchAdapter.clear();
+        Log.v("sea1",""+searchAdapter.getItemCount());
         if(cardAdapter.getItemCount()!=0){
             for(int i=0;i<cardAdapter.getItemCount();i++){
-                if(cardAdapter.getItem(i).getName().contains(query)||cardAdapter.getItem(i).getId().contains(query)){
+                if(cardAdapter.getItem(i).getName().contains(query)||cardAdapter.getItem(i).getId().equals(query)){
                     searchAdapter.add(cardAdapter.getItem(i));
                 }
             }

@@ -1,9 +1,15 @@
 package com.example.superheroes;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.room.Room;
 
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +75,12 @@ public class Details extends Fragment {
     private ArrayList<Data> dataArrayList=new ArrayList<>();
     private ListView listView;
     private DataAdapter dataAdapter;
+    private List<FavHero> superHeroes;
+    private AppDataBase appDataBase;
+    private FavDao favDao;
+    private ImageView favImage;
+    private ImageView share;
+    private ImageView image;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,6 +88,39 @@ public class Details extends Fragment {
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_details, container, false);
         superHero=(superHero)getArguments().getSerializable("hero");
+        appDataBase= Room.databaseBuilder(getContext(),AppDataBase.class,"FavDataBase").allowMainThreadQueries().build();
+        favDao=appDataBase.favDao();
+        favImage=view.findViewById(R.id.favimage);
+        share=view.findViewById(R.id.share);
+        image=view.findViewById(R.id.imageViewHero);
+        if(superHero!=null){
+            superHeroes=favDao.getById(superHero.getId());
+        }
+        if(superHeroes.size()==0&&superHero!=null){
+            favImage.setVisibility(View.VISIBLE);
+
+            share.setVisibility(View.INVISIBLE);
+        }
+        else{
+            share.setVisibility(View.VISIBLE);
+            favImage.setVisibility(View.INVISIBLE);
+
+
+        }
+        favImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                favDao.Insert(new FavHero(superHero.getId(),superHero.getName()));
+                favImage.setVisibility(View.INVISIBLE);
+                share.setVisibility(View.VISIBLE);
+            }
+        });
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareData();
+            }
+        });
         if(superHero.getName()!=null)
         dataArrayList.add(new Data("Name",superHero.getName()));
         if(superHero.getId()!=null)
@@ -138,6 +183,20 @@ public class Details extends Fragment {
         dataAdapter=new DataAdapter(getContext(),dataArrayList);
         listView.setAdapter(dataAdapter);
         return view;
+    }
+
+    public void ShareData() {
+        if (image.getDrawable() != null) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) image.getDrawable();
+            Bitmap bitmap = bitmapDrawable.getBitmap();
+            String bitmapPath = MediaStore.Images.Media.insertImage(getContext().getContentResolver(), bitmap, "SuperHero", null);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            Uri bitmapUri = Uri.parse(bitmapPath);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
+            intent.putExtra(Intent.EXTRA_TEXT, "NAME" + ":" + superHero.getName());
+            startActivity(Intent.createChooser(intent, "Share Image"));
+        }
     }
 
 }
