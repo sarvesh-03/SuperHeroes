@@ -189,7 +189,7 @@ public class Details extends Fragment {
         if (image.getDrawable() != null) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) image.getDrawable();
             Bitmap bitmap = bitmapDrawable.getBitmap();
-            String bitmapPath = MediaStore.Images.Media.insertImage(getContext().getContentResolver(), bitmap, "SuperHero", null);
+            String bitmapPath = MediaStore.Images.Media.insertImage(getContext().getContentResolver(), bitmap, "Dog", null);
             Intent intent = new Intent(Intent.ACTION_SEND);
             Uri bitmapUri = Uri.parse(bitmapPath);
             intent.setType("image/*");
@@ -198,5 +198,4 @@ public class Details extends Fragment {
             startActivity(Intent.createChooser(intent, "Share Image"));
         }
     }
-
 }
